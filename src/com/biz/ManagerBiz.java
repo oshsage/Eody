@@ -104,6 +104,18 @@ public class ManagerBiz implements Biz<String, Integer, ManagerVO> {
 					return null;
 				}
 
+				@Override
+				public ArrayList<ManagerVO> bookingupdate_reviewstat(String k) throws Exception {
+					// TODO Auto-generated method stub
+					return null;
+				}
+
+				@Override
+				public void update_reviewstat2(ManagerVO v) throws Exception {
+					// TODO Auto-generated method stub
+					
+				}
+
 
 }
 

@@ -21,8 +21,10 @@
                                 <div class="explorer_info">
 
                                         <form enctype="multipart/form-data" action="reviewadd.mc" method="post">
+                                        <input type="hidden" name="booking_no" value="${b.booking_no}">
                                         <input type="hidden" name="shop_name">
                                         <input type="hidden" name="review_name" value="${loginuser.searcher_nickname}">
+                                        <input type="hidden" name="searcher_id" value="${loginuser.searcher_id}">
                                         <div>별점</div>
                                         <div class="starRev mb-20">
                                                 <span class="starR" value="1">별1</span> 
@@ -49,7 +51,7 @@
                                         </div>
                                         
                                         <div class="mb-20">
-                                                <button class="boxed-btn2 mb-30" type="submit">리뷰 등록하기</button>
+                                                <button class="boxed-btn2 mb-30" onclick="alert('리뷰가 등록되었습니다')" type="submit">리뷰 등록하기</button>
                                         </div>
                                         
 

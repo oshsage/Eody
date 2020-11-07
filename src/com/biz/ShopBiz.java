@@ -110,4 +110,16 @@ public class ShopBiz implements Biz<String,Integer, ShopVO> {
 			return dao.shop_hotplace_select(k);
 		}
 
+		@Override
+		public ArrayList<ShopVO> bookingupdate_reviewstat(String k) throws Exception {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void update_reviewstat2(ShopVO v) throws Exception {
+			// TODO Auto-generated method stub
+			
+		}
+
 }

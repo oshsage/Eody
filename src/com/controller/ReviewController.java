@@ -19,28 +19,35 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.frame.Biz;
+import com.vo.BookingVO;
 import com.vo.ReviewVO;
 import com.vo.SearcherVO;
+import com.vo.ShopVO;
 
 @Controller
 public class ReviewController {
 
         @Resource(name = "rbiz")
         Biz<String, Integer, ReviewVO> rbiz;
-
-        // ∏Æ∫‰ µÓ∑œ º≠∫Ì∏¥
+        @Resource(name = "shopbiz")
+        Biz<String,Integer, ShopVO> shopbiz;
+        @Resource(name = "bookingbiz")
+        Biz<String, Integer, BookingVO> bbiz;
+        
+        //Î¶¨Î∑∞ Îì±Î°ù ÏÑúÎ∏îÎ¶ø
         @RequestMapping("/reviewadd.mc")
         public ModelAndView reviewadd(ModelAndView mv, ReviewVO review, SearcherVO searcher,
                         @RequestParam("files") MultipartFile[] files) {
-        	
-        		// ∞°∞‘ ¿Ã∏ß¿∫ hidden ∞™¿∏∑Œ ≥—∞‹πﬁæ“¿Ω
-                // ∏Æ∫‰ø° ∏≈±‰ ∆Ú¡°¿∫ hidden ∞™¿∏∑Œ ≥—∞‹πﬁæ“¿Ω
-                // ∏Æ∫‰∏¶ ¿€º∫«— searcher¿« nickname∞™¿ª hidden¿∏∑Œ ≥—∞‹πﬁæ“¿Ω
-
-                // ∏Æ∫‰ø° æ˜∑ŒµÂ«— ªÁ¡¯¿Ã∏ß ¿˙¿Â
+        		
+        		System.out.println(review.toString());
+        		// Ïó∞Í≤∞Îêú ÏòàÏïΩ Î≤àÌò∏Îäî hidden Í∞íÏúºÎ°ú ÎÑòÍ≤®Î∞õÏïòÏùå.
+	        	// Í∞ÄÍ≤å Ïù¥Î¶ÑÏùÄ hidden Í∞íÏúºÎ°ú ÎÑòÍ≤®Î∞õÏïòÏùå
+	            // Î¶¨Î∑∞Ïóê Îß§Í∏¥ ÌèâÏ†êÏùÄ hidden Í∞íÏúºÎ°ú ÎÑòÍ≤®Î∞õÏïòÏùå
+	            // Î¶¨Î∑∞Î•º ÏûëÏÑ±Ìïú searcherÏùò nicknameÍ∞íÏùÑ hiddenÏúºÎ°ú ÎÑòÍ≤®Î∞õÏïòÏùå
+	            // Î¶¨Î∑∞Ïóê ÏóÖÎ°úÎìúÌïú ÏÇ¨ÏßÑÏù¥Î¶Ñ Ï†ÄÏû•
                 System.out.println("size : " + files.length);
                 int len = files.length;
-                System.out.println("ªÁ¡¯ ±Ê¿Ã : " + len);
+                System.out.println("ÏÇ¨ÏßÑ Í∏∏Ïù¥ : " + len);
                 if(files[0].getOriginalFilename() == "") {
                 	review.setReview_image1("default.jpg");
                     review.setReview_image2("default.jpg");
@@ -62,28 +69,47 @@ public class ReviewController {
 
                 try {
                         rbiz.register(review);
-                        // ªÁ¡¯∆ƒ¿œ ∆˙¥ıø° ¿˙¿Â
+                        // ÏÇ¨ÏßÑÌååÏùº Ìè¥ÎçîÏóê Ï†ÄÏû•
                         for (MultipartFile f : files) {
                                 if (f.getOriginalFilename() == "") {
                                         continue;
                                 }
-                                Util.saveFile(f, review.getReview_name());
+                                Util.saveReviewFile(f, review.getReview_name());
                         }
-
+                        //ÏÉÅÏ†ê ÌèâÍ∑† ÌèâÏ†ê ÏàòÏ†ï
+                        shopbiz.shop_score_avg(review.getShop_name());
                 } catch (Exception e) {
                         e.printStackTrace();
                 }
+                
+                
+                // Î¶¨Î∑∞ ÏûëÏÑ± ÏôÑÎ£å ÏãúÏ†êÏóêÏÉùÏÑ±Îêú reviewÏùò review_noÎ•º Î∞õÏïÑÏôÄ Í¥ÄÎ†® bookingÏóê review_no Îß§Ìïë, 
+                // Ìï¥Îãπ bookingÏùò reviewStat Î≥ÄÌôî(0->1)
+                try {
+                	ReviewVO review2 = rbiz.get1(String.valueOf(review.getBooking_no()));
+                	int review_no = review2.getReview_no();
+                	
+					BookingVO booking = bbiz.get1(String.valueOf(review.getBooking_no()));
+					booking.setReview_no(String.valueOf(review_no));
+					
+					System.out.println(booking.toString());
+					bbiz.modify(booking);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+                // 
+      
 
-                // redirect¿∏∑Œ «ÿæﬂ submit ¡ﬂ∫π¿ª ∏∑¿Ω
+                //redirectÏúºÎ°ú Ìï¥Ïïº submit Ï§ëÎ≥µÏùÑ ÎßâÏùå
                 mv.setViewName("redirect:myroom.mc");
                 return mv;
         }
 
-        // ∏Æ∫‰∏ÆΩ∫∆Æ »≠∏È √≥∏Æ
+        // Î¶¨Î∑∞Î¶¨Ïä§Ìä∏ ÌôîÎ©¥ Ï≤òÎ¶¨
         @ResponseBody
         @RequestMapping("/getReview.mc")
         public void getReview(HttpServletResponse res, String ashop) throws IOException {
-                System.out.println("shop ¿Ã∏ß : " + ashop);
+                System.out.println("shop Ïù¥Î¶Ñ : " + ashop);
                 JSONArray ja = new JSONArray();
                 ArrayList<ReviewVO> list = new ArrayList<>();
                 try {
@@ -94,7 +120,7 @@ public class ReviewController {
                 }
                 //System.out.println("list: " + list.toString());
                 DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                System.out.println("ªÁ¿Ã¡Ó : " + list.size());
+                System.out.println("ÏÇ¨Ïù¥Ï¶à : " + list.size());
                 for (int i = 0; i < list.size(); i++) {
                         JSONObject data = new JSONObject();
                         data.put("review_date", format.format(list.get(i).getReview_date()));
@@ -118,6 +144,31 @@ public class ReviewController {
                 out.print(ja.toJSONString());
                 out.close();
         }
+        
+        // ÎßàÏù¥Î£∏ÏóêÏÑú Î¶¨Î∑∞ ÏÇ≠Ï†ú
+        @RequestMapping("/removeReviewImpl.mc")
+        public ModelAndView removeReviewImpl(ModelAndView mv, String booking_no) {
+        	try {
+        		// Ìï¥Îãπ ÏòàÏïΩÍ±¥ÏùÑ Í∞ÄÏ†∏ÏôÄ Î¨∂Ïó¨ÏûàÎäî Î¶¨Î∑∞Î•º ÏÇ≠Ï†ú
+        		System.out.println(booking_no);
+        		BookingVO booking = bbiz.get1(booking_no);
+        		String review_no = booking.getReview_no();
+        		System.out.println(review_no);
+				rbiz.remove1(review_no);
+				
+				// Ìï¥Îãπ ÏòàÏïΩÍ±¥Ïùò review_stat Î≥ÄÌôî(1->0), review_no NULLÎ°ú ÏàòÏ†ï
+				bbiz.update_reviewstat2(booking);
+				
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+        	
+        	mv.setViewName("redirect:myroom.mc");
+        	return mv;
+        }
+        
+        
 
 
 }
